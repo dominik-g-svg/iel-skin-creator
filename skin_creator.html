@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dino Skin Creator – In einem Land vor unserer Zeit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0b08;
+      --bg2:      #161210;
+      --bg3:      #0a0806;
+      --border:   #3a2e1a;
+      --border2:  #2a2010;
+      --gold:     #c8a84b;
+      --gold-dim: #776655;
+      --text:     #d4c8a8;
+      --muted:    #554433;
+      --teal:     #427070;
+    }
+
+    html, body { min-height: 100vh; background: var(--bg); color: var(--text);
+      font-family: 'Crimson Text', Georgia, serif; }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(180deg, #1a1208 0%, #100e08 100%);
+      border-bottom: 1px solid #c8a84b33;
+      padding: 22px 32px 18px;
+      text-align: center;
+    }
+    header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(18px, 4vw, 28px);
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 3px;
+      text-shadow: 0 0 30px #c8a84b44;
+    }
+    header p {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: var(--gold-dim);
+      letter-spacing: 4px;
+      margin-top: 5px;
+    }
+
+    /* ── LAYOUT ── */
+    .wrap {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .col-l { flex: 1 1 370px; display: flex; flex-direction: column; gap: 16px; }
+    .col-r { flex: 1 1 330px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gold-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding-bottom: 9px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border2);
+    }
+
+    /* ── SPECIES ── */
+    .sp-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sp-btn {
+      padding: 4px 11px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg3);
+      color: var(--gold-dim);
+      cursor: pointer;
+      font-size: 12px;
+      font-family: 'Cinzel', serif;
+      transition: all 0.12s;
+    }
+    .sp-btn:hover { border-color: #c8a84b88; color: #bba060; }
+    .sp-btn.active { border-color: var(--gold); color: var(--gold); background: #1a1208; }
+
+    /* ── SVG PREVIEW ── */
+    #dino-svg { width: 100%; max-width: 520px; display: block; margin: 0 auto; }
+    #dino-svg path, #dino-svg ellipse { transition: fill 0.2s, filter 0.15s; cursor: pointer; }
+    #dino-svg path.hov { filter: brightness(1.1); }
+    #dino-svg path.active-region { filter: brightness(1.2) drop-shadow(0 0 5px #c8a84b55); }
+
+    /* ── REGION LIST ── */
+    .r-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+    .r-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 10px; border-radius: 5px;
+      border: 1px solid transparent; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .r-row:hover { background: #c8a84b08; }
+    .r-row.active { border-color: #c8a84b55; background: #c8a84b0e; }
+    .r-dot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid #00000044; flex-shrink: 0; transition: background 0.2s; }
+    .r-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; color: #887766; flex: 1; }
+    .r-row.active .r-name { color: var(--gold); }
+    .r-desc { font-size: 12px; color: var(--muted); font-style: italic; }
+
+    /* ── ACTIVE REGION CARD ── */
+    .a-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; background: var(--bg3);
+      border: 1px solid var(--border2); border-radius: 6px;
+    }
+    .a-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #00000044; flex-shrink: 0; transition: background 0.2s, box-shadow 0.2s; }
+    .a-name { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold); font-weight: 600; }
+    .a-desc { font-size: 12px; color: var(--gold-dim); font-style: italic; margin-top: 2px; }
+    .a-idx  { margin-left: auto; font-size: 11px; font-family: 'Cinzel', serif; color: var(--muted); text-align: right; line-height: 1.5; }
+
+    /* ── PALETTE ── */
+    .pal-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 4px; }
+    .swatch {
+      width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.1s; display: block;
+      padding: 0;
+    }
+    .swatch:hover { transform: scale(1.15); border-color: #c8a84b88; }
+    .swatch.active { border-color: var(--gold); transform: scale(1.22); box-shadow: 0 0 8px #c8a84b66; }
+
+    /* ── EYEDROPPER ── */
+    .eye-btn {
+      margin-top: 10px;
+      padding: 8px 14px;
+      background: #0e1e1e;
+      border: 1px solid #2e5858;
+      border-radius: 5px;
+      color: var(--teal);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .eye-btn:hover { background: #162828; border-color: var(--teal); }
+
+    /* ── CONTROLS ── */
+    .ctrl-row { display: flex; gap: 10px; }
+    .ctrl-col { flex: 1; }
+    .ctrl-lbl {
+      display: block; font-family: 'Cinzel', serif; font-size: 10px;
+      color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;
+    }
+    select {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 5px; color: var(--text); padding: 7px 9px;
+      font-family: 'Crimson Text', serif; font-size: 13px;
+      outline: none; cursor: pointer; appearance: none;
+    }
+    select:focus { border-color: #c8a84b66; }
+
+    /* ── CODE BOX ── */
+    .code-box {
+      background: #060504; border: 1px solid var(--border);
+      border-radius: 6px; padding: 11px 13px; margin-top: 6px;
+      word-break: break-all;
+    }
+    .code-text { font-size: 12px; color: var(--gold); font-family: 'Courier New', monospace; line-height: 1.7; }
+    .btn-row { display: flex; gap: 8px; margin-top: 9px; }
+    .cp-btn {
+      flex: 1; padding: 9px 0;
+      background: #c8a84b1a; border: 1px solid var(--gold);
+      border-radius: 5px; color: var(--gold);
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .cp-btn:hover { background: #c8a84b33; }
+    .cp-btn.ok { background: #1a3018; border-color: #4a8040; color: #7acc60; }
+    .hint { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 8px; line-height: 1.6; }
+    .hint code { color: var(--gold-dim); font-style: normal; }
+
+    footer {
+      text-align: center; padding: 24px;
+      font-family: 'Cinzel', serif; font-size: 10px;
+      color: #3a2e1a; letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🦕 DINO SKIN CREATOR</h1>
+  <p>IN EINEM LAND VOR UNSERER ZEIT</p>
+</header>
+
+<div class="wrap">
+  <!-- LEFT -->
+  <div class="col-l">
+
+    <!-- Species -->
+    <div class="card">
+      <div class="card-title">Dino-Art wählen</div>
+      <div class="sp-grid" id="sp-grid"></div>
+    </div>
+
+    <!-- Preview -->
+    <div class="card">
+      <div class="card-title">Vorschau — Körperbereiche anklicken</div>
+      <svg id="dino-svg" viewBox="0 0 520 300">
+        <!-- tail + legs + arms = region 4 -->
+        <path data-r="4" d="M355,150 C382,138 418,128 452,124 C470,122 486,128 491,140 C493,152 486,165 472,172 C452,180 418,178 388,173 C366,168 348,162 352,152 Z"/>
+        <path data-r="4" d="M284,194 C280,212 276,232 272,252 C268,268 264,278 260,286 L275,287 L285,278 C292,264 297,246 300,228 C303,210 302,196 292,193 Z"/>
+        <path data-r="4" d="M260,286 L252,296 L268,298 L280,292 L285,278 L275,287 Z"/>
+        <path data-r="4" d="M166,130 C163,148 160,165 158,180 C164,177 172,175 178,178 C181,162 183,144 181,130 Z"/>
+        <path data-r="4" d="M158,180 L151,192 L162,191 L168,185 L178,178 L164,177 Z"/>
+        <!-- flanks = region 3 -->
+        <path data-r="3" d="M153,110 C174,94 214,84 262,84 C305,84 343,94 364,112 C377,125 378,144 368,162 C354,178 328,188 294,194 C263,199 229,198 202,190 C176,182 156,170 146,154 C137,140 138,122 153,110 Z"/>
+        <!-- underbelly = region 1 -->
+        <path data-r="1" d="M146,154 C156,170 176,182 202,190 C229,198 263,199 294,194 C310,200 308,215 290,220 C264,228 228,226 200,218 C172,210 152,198 144,182 C139,170 140,160 146,154 Z"/>
+        <!-- dorsal = region 2 -->
+        <path data-r="2" d="M153,110 C158,98 168,88 182,80 C204,68 242,62 282,65 C320,68 350,80 367,98 C374,107 376,116 370,120 C352,108 320,98 280,96 C240,94 202,98 176,110 C164,115 156,115 153,110 Z"/>
+        <!-- neck = region 3 -->
+        <path data-r="3" d="M116,94 C130,82 148,78 158,86 C162,92 162,102 158,110 C150,115 136,115 126,110 C117,105 113,100 116,94 Z"/>
+        <!-- head = region 2 -->
+        <path data-r="2" d="M50,90 C56,74 72,64 90,62 C110,60 126,68 132,82 C136,91 134,102 127,109 C118,116 104,119 86,117 C68,115 56,108 50,98 C46,94 46,90 50,90 Z"/>
+        <!-- crest = region 0 -->
+        <path data-r="0" d="M72,62 C78,48 86,36 92,33 C96,40 97,52 95,63 C102,52 110,40 115,38 C117,47 115,58 110,67 C115,59 122,50 126,51 C126,60 119,70 112,74 C120,70 128,68 132,70 C130,77 122,83 113,84 C103,84 94,80 85,74 C78,70 73,66 72,62 Z"/>
+        <!-- throat = region 1 -->
+        <path data-r="1" d="M53,100 C58,110 70,118 86,119 C99,120 112,118 118,114 C116,122 110,130 98,132 C86,134 72,130 62,120 C55,112 51,106 53,100 Z"/>
+        <!-- eye, nostril, mouth (decorative) -->
+        <circle cx="77" cy="86" r="5.5" fill="#080808" stroke="#44330022" stroke-width="1.5" style="pointer-events:none"/>
+        <circle cx="75" cy="84.5" r="1.8" fill="rgba(255,255,255,0.3)" style="pointer-events:none"/>
+        <ellipse cx="53" cy="94" rx="3" ry="2.2" fill="rgba(0,0,0,0.25)" style="pointer-events:none"/>
+        <path d="M48,97 Q65,101 84,100" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="1.5" stroke-linecap="round" style="pointer-events:none"/>
+      </svg>
+
+      <!-- Region list -->
+      <div class="r-list" id="r-list"></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="col-r">
+
+    <!-- Active region -->
+    <div class="card" style="padding:14px 16px">
+      <div class="card-title">Aktiver Bereich</div>
+      <div class="a-card">
+        <div class="a-dot" id="a-dot"></div>
+        <div>
+          <div class="a-name" id="a-name"></div>
+          <div class="a-desc" id="a-desc"></div>
+        </div>
+        <div class="a-idx" id="a-idx"></div>
+      </div>
+    </div>
+
+    <!-- Palette -->
+    <div class="card">
+      <div class="card-title">Farbpalette</div>
+      <div class="pal-grid" id="pal-grid"></div>
+      <button class="eye-btn" id="eye-btn">🔬 Pipette — Farbe vom Bildschirm</button>
+    </div>
+
+    <!-- Pattern + variation -->
+    <div class="card">
+      <div class="card-title">Muster &amp; Intensität</div>
+      <div class="ctrl-row">
+        <div class="ctrl-col">
+          <label class="ctrl-lbl">Muster</label>
+          <select id="pat-sel">
+            <option value="0">0 — Kein Muster</option>
+            <option value="1">Muster 1</option>
+            <option value="2">Muster 2</option>
+            <option value="3">Muster 3</option>
+            <option value="4">Muster 4</option>
+            <option value="5">Muster 5</option>
+            <option value="6">Muster 6</option>
+            <option value="7">Muster 7</option>
+            <option value="8">Muster 8</option>
+            <option value="9">Muster 9</option>
+          </select>
+        </div>
+        <div class="ctrl-col">
+          <label class="ctrl-lbl">Intensität</label>
+          <select id="var-sel">
+            <option value="0">Aus</option>
+            <option value="1">Klein</option>
+            <option value="2">Mittel</option>
+            <option value="3">Groß</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code output -->
+    <div class="card">
+      <div class="card-title">Generierter Skin-Code</div>
+      <div class="code-box"><div class="code-text" id="code-out"></div></div>
+      <div class="btn-row">
+        <button class="cp-btn" id="cp-btn">📋 Code kopieren</button>
+      </div>
+      <p class="hint">
+        Gib diesen Code an deinen Server-Admin weiter oder nutze den Bot-Command
+        <code>/skin [code]</code> im Discord — dein Skin wird dann gespeichert.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<footer>© IN EINEM LAND VOR UNSERER ZEIT — SKIN CREATOR</footer>
+
+<script>
+const PAL = [
+  {h:"#111111",n:"Obsidian"},{h:"#282828",n:"Charcoal"},{h:"#404040",n:"Dark Slate"},
+  {h:"#606060",n:"Ash"},{h:"#888888",n:"Stone"},{h:"#aaaaaa",n:"Silver"},
+  {h:"#cccccc",n:"Pale Grey"},{h:"#eeeeee",n:"Bone"},{h:"#3a1508",n:"Dark Bark"},
+  {h:"#5c2210",n:"Mahogany"},{h:"#7a3818",n:"Chestnut"},{h:"#9a5228",n:"Oak"},
+  {h:"#bb7040",n:"Tawny"},{h:"#d49050",n:"Sandy"},{h:"#e8b870",n:"Dune"},
+  {h:"#f5d898",n:"Cream"},{h:"#1c2c0e",n:"Deep Forest"},{h:"#2c4415",n:"Pine"},
+  {h:"#3e5c1e",n:"Fern"},{h:"#587830",n:"Olive"},{h:"#789845",n:"Sage"},
+  {h:"#98bc5a",n:"Lichen"},{h:"#182e2e",n:"Deep Swamp"},{h:"#204040",n:"Swamp"},
+  {h:"#2e5858",n:"Mire"},{h:"#427070",n:"Teal"},{h:"#380e0e",n:"Dark Blood"},
+  {h:"#581818",n:"Crimson"},{h:"#782222",n:"Rust"},{h:"#983838",n:"Red Clay"},
+  {h:"#bc5838",n:"Terracotta"},{h:"#d47848",n:"Ochre"},{h:"#e8a060",n:"Amber"},
+  {h:"#d4be38",n:"Yellow"},{h:"#b89820",n:"Gold"},{h:"#7a6810",n:"Dark Gold"},
+  {h:"#101c38",n:"Midnight"},{h:"#1c2e5e",n:"Navy"},{h:"#284878",n:"Cobalt"},
+  {h:"#ffffff",n:"White"},
+];
+
+const SPECIES = [
+  // Karnivoren
+  "Utahraptor","Omniraptor","Tyrannosaurus","Carnotaurus","Ceratosaurus",
+  "Troodon","Dilophosaurus","Pteranodon",
+  // Herbivoren
+  "Stegosaurus","Tenontosaurus","Hypsilophodon","Pachycephalosaurus",
+  "Diabloceratops","Dryosaurus","Maiasaura","Triceratops",
+  // Omnivoren
+  "Gallimimus","Beipiaosaurus"
+];
+
+const REGIONS = [
+  {id:0,name:"Detail / Kamm",  desc:"Kamm, Kopfmarkierungen"},
+  {id:1,name:"Unterbauch",     desc:"Brust, Bauch, Kehle"},
+  {id:2,name:"Körper 1",       desc:"Hauptrücken & Dorsal"},
+  {id:3,name:"Körper 2",       desc:"Flanken & Seiten"},
+  {id:4,name:"Körper 3",       desc:"Beine, Schwanz, Arme"},
+];
+
+const VAR_MAP = ["00000","80000","60000","40000"];
+
+// ── State ──
+let sp      = SPECIES[0];
+let pat     = 0;
+let vari    = 0;
+let colors  = [11, 7, 10, 13, 3];
+let active  = 2;
+
+// ── Build code ──
+function buildCode() {
+  const p  = String(pat).padStart(2,"0");
+  const s  = colors.map(c => String(c).padStart(5,"0")).join(".");
+  const t  = colors.reduce((a,c,i) => a + c*(i+1)*337, 0).toString().slice(-10).padStart(10,"0");
+  return `${sp}${p}.${s}.${VAR_MAP[vari]}.${t}`;
+}
+
+// ── SVG fill ──
+function updateSVG() {
+  document.querySelectorAll('#dino-svg path[data-r]').forEach(el => {
+    const r = +el.dataset.r;
+    el.style.fill   = PAL[colors[r]].h;
+    el.style.stroke = r === active ? "#c8a84b" : "#00000055";
+    el.style.strokeWidth = r === active ? "2.5" : "1";
+    el.style.filter = r === active
+      ? "brightness(1.2) drop-shadow(0 0 5px #c8a84b55)"
+      : "none";
+  });
+}
+
+// ── Active region info ──
+function updateActiveInfo() {
+  const reg = REGIONS[active];
+  const col = PAL[colors[active]];
+  document.getElementById('a-dot').style.background  = col.h;
+  document.getElementById('a-dot').style.boxShadow   = `0 0 8px ${col.h}99`;
+  document.getElementById('a-name').textContent      = reg.name;
+  document.getElementById('a-desc').textContent      = reg.desc;
+  document.getElementById('a-idx').innerHTML         = `#${colors[active]}<br>${col.n}`;
+}
+
+// ── Palette ──
+function updatePalette() {
+  document.querySelectorAll('.swatch').forEach((el, i) => {
+    el.classList.toggle('active', colors[active] === i);
+  });
+}
+
+// ── Region list ──
+function updateRegionList() {
+  document.querySelectorAll('.r-row').forEach(el => {
+    const id = +el.dataset.r;
+    el.classList.toggle('active', id === active);
+    el.querySelector('.r-dot').style.background = PAL[colors[id]].h;
+    el.querySelector('.r-dot').style.boxShadow  = id === active ? `0 0 6px ${PAL[colors[id]].h}88` : "none";
+  });
+}
+
+// ── Code output ──
+function updateCode() {
+  document.getElementById('code-out').textContent = buildCode();
+}
+
+// ── Full render ──
+function render() {
+  updateSVG();
+  updateActiveInfo();
+  updatePalette();
+  updateRegionList();
+  updateCode();
+}
+
+// ── Init: species buttons ──
+const spGrid = document.getElementById('sp-grid');
+SPECIES.forEach(name => {
+  const btn = document.createElement('button');
+  btn.className = 'sp-btn' + (name === sp ? ' active' : '');
+  btn.textContent = name;
+  btn.addEventListener('click', () => {
+    sp = name;
+    document.querySelectorAll('.sp-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+  spGrid.appendChild(btn);
+});
+
+// ── Init: region list ──
+const rList = document.getElementById('r-list');
+REGIONS.forEach(reg => {
+  const row = document.createElement('div');
+  row.className = 'r-row' + (reg.id === active ? ' active' : '');
+  row.dataset.r = reg.id;
+  row.innerHTML = `<div class="r-dot"></div><span class="r-name">${reg.name}</span><span class="r-desc">${reg.desc}</span>`;
+  row.addEventListener('click', () => { active = reg.id; render(); });
+  rList.appendChild(row);
+});
+
+// ── Init: palette ──
+const palGrid = document.getElementById('pal-grid');
+PAL.forEach((c, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'swatch' + (colors[active] === i ? ' active' : '');
+  btn.style.background = c.h;
+  btn.title = `${c.n} (Index ${i})`;
+  btn.addEventListener('click', () => {
+    colors[active] = i;
+    render();
+  });
+  palGrid.appendChild(btn);
+});
+
+// ── SVG click ──
+document.querySelectorAll('#dino-svg path[data-r]').forEach(el => {
+  el.addEventListener('click', () => { active = +el.dataset.r; render(); });
+  el.addEventListener('mouseenter', () => {
+    if (+el.dataset.r !== active) el.style.filter = "brightness(1.1)";
+  });
+  el.addEventListener('mouseleave', () => {
+    if (+el.dataset.r !== active) el.style.filter = "none";
+  });
+});
+
+// ── Pattern / variation ──
+document.getElementById('pat-sel').addEventListener('change', e => { pat  = +e.target.value; render(); });
+document.getElementById('var-sel').addEventListener('change', e => { vari = +e.target.value; render(); });
+
+// ── Copy ──
+document.getElementById('cp-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('cp-btn');
+  try {
+    await navigator.clipboard.writeText(buildCode());
+    btn.textContent = "✅ Kopiert!";
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = "📋 Code kopieren"; btn.classList.remove('ok'); }, 2200);
+  } catch { btn.textContent = "❌ Fehler"; setTimeout(() => { btn.textContent = "📋 Code kopieren"; }, 1500); }
+});
+
+// ── Eyedropper ──
+document.getElementById('eye-btn').addEventListener('click', async () => {
+  if (!window.EyeDropper) { alert("Pipette benötigt Chrome 95+ oder Edge 95+."); return; }
+  try {
+    const { sRGBHex } = await new EyeDropper().open();
+    const r1 = parseInt(sRGBHex.slice(1,3),16);
+    const g1 = parseInt(sRGBHex.slice(3,5),16);
+    const b1 = parseInt(sRGBHex.slice(5,7),16);
+    let best = 0, bd = Infinity;
+    PAL.forEach(({h}, i) => {
+      const r2=parseInt(h.slice(1,3),16), g2=parseInt(h.slice(3,5),16), b2=parseInt(h.slice(5,7),16);
+      const d = (r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2;
+      if (d < bd) { bd = d; best = i; }
+    });
+    colors[active] = best;
+    render();
+  } catch {}
+});
+
+// ── Initial render ──
+render();
+</script>
+</body>
+</html>
